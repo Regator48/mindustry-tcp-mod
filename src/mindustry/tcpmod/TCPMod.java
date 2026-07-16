@@ -3,7 +3,6 @@ package mindustry.tcpmod;
 import arc.Core;
 import arc.Events;
 import arc.graphics.Color;
-import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.Scaling;
 import mindustry.Vars;
@@ -15,8 +14,6 @@ import mindustry.ui.dialogs.BaseDialog;
 
 public class TCPMod extends Mod {
 
-    public static boolean tcpEnabled = false;
-
     public TCPMod() {
         Log.info("TCP Mod: Loaded");
     }
@@ -25,7 +22,10 @@ public class TCPMod extends Mod {
     public void init() {
         Log.info("TCP Mod: init");
 
-        tcpEnabled = Core.settings.getBool("tcp-mod-enabled", false);
+        // Enable TCP if it was enabled before
+        if (Core.settings.getBool("tcp-mod-enabled", false)) {
+            TCPForcer.enable();
+        }
 
         Events.on(ClientLoadEvent.class, e -> {
             Core.app.post(() -> {
@@ -39,7 +39,7 @@ public class TCPMod extends Mod {
         BaseDialog dialog = new BaseDialog("TCP Mode");
         dialog.addCloseButton();
 
-        boolean enabled = tcpEnabled;
+        boolean enabled = TCPForcer.isActive();
 
         dialog.cont.table(t -> {
             t.left();
@@ -47,16 +47,16 @@ public class TCPMod extends Mod {
             t.add("TCP over UDP").style(Styles.defaultLabel).color(Color.white).growX().left();
         }).growX().pad(10).row();
 
-        dialog.cont.add("Force TCP instead of UDP to reduce error snapshots.")
+        dialog.cont.add("Force TCP instead of UDP to reduce error snapshots.\nWorks in multiplayer - falls back automatically if TCP fails.")
             .color(Color.lightGray).fontScale(0.9f).wrap().growX().pad(10).row();
 
         dialog.cont.button(enabled ? "ON" : "OFF", () -> {
-            tcpEnabled = !tcpEnabled;
-            Core.settings.put("tcp-mod-enabled", tcpEnabled);
-            if (tcpEnabled) {
-                TCPForcer.enable();
-            } else {
+            if (TCPForcer.isActive()) {
                 TCPForcer.disable();
+                Core.settings.put("tcp-mod-enabled", false);
+            } else {
+                TCPForcer.enable();
+                Core.settings.put("tcp-mod-enabled", true);
             }
             dialog.hide();
             showDialog();

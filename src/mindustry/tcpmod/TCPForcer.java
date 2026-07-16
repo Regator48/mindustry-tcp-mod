@@ -6,12 +6,12 @@ import mindustry.net.ArcNetProvider;
 import mindustry.net.Net;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 public class TCPForcer {
     private static boolean active = false;
+    private static Object originalProvider = null;
 
     public static void enable() {
         if (active) return;
@@ -19,12 +19,15 @@ public class TCPForcer {
         try {
             Field providerField = Net.class.getDeclaredField("provider");
             providerField.setAccessible(true);
-            Object originalProvider = providerField.get(Vars.net);
+            Object currentProvider = providerField.get(Vars.net);
 
-            if (!(originalProvider instanceof ArcNetProvider arcProvider)) {
+            if (!(currentProvider instanceof ArcNetProvider arcProvider)) {
                 Log.warn("TCP Mod: Not an ArcNetProvider");
                 return;
             }
+
+            // Save original for restore
+            originalProvider = currentProvider;
 
             Field clientField = ArcNetProvider.class.getDeclaredField("client");
             clientField.setAccessible(true);
@@ -43,7 +46,14 @@ public class TCPForcer {
                 new Class<?>[]{ providerInterface },
                 (proxyObj, method, args) -> {
                     if ("sendClient".equals(method.getName()) && args.length == 2) {
-                        sendTCP.invoke(client, args[0]);
+                        boolean reliable = (boolean) args[1];
+                        // Force ALL packets through TCP (reliable and unreliable)
+                        try {
+                            sendTCP.invoke(client, args[0]);
+                        } catch (Exception e) {
+                            Log.err("TCP Mod: TCP send failed, falling back", e);
+                            return method.invoke(originalProvider, args);
+                        }
                         return null;
                     }
                     return method.invoke(originalProvider, args);
@@ -59,9 +69,18 @@ public class TCPForcer {
     }
 
     public static void disable() {
-        if (!active) return;
-        active = false;
-        Log.info("TCP Mod: TCP forcing disabled (restart to fully restore)");
+        if (!active || originalProvider == null) return;
+
+        try {
+            Field providerField = Net.class.getDeclaredField("provider");
+            providerField.setAccessible(true);
+            providerField.set(Vars.net, originalProvider);
+            active = false;
+            Log.info("TCP Mod: TCP forcing disabled, restored original provider");
+        } catch (Exception e) {
+            Log.err("TCP Mod: Failed to restore original provider", e);
+            active = false;
+        }
     }
 
     public static boolean isActive() {
