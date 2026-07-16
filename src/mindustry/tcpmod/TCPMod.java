@@ -22,7 +22,6 @@ public class TCPMod extends Mod {
     public void init() {
         Log.info("TCP Mod: init");
 
-        // Enable TCP if it was enabled before
         if (Core.settings.getBool("tcp-mod-enabled", false)) {
             TCPForcer.enable();
         }
@@ -47,7 +46,7 @@ public class TCPMod extends Mod {
             t.add("TCP over UDP").style(Styles.defaultLabel).color(Color.white).growX().left();
         }).growX().pad(10).row();
 
-        dialog.cont.add("Force TCP instead of UDP to reduce error snapshots.\nWorks in multiplayer - falls back automatically if TCP fails.")
+        dialog.cont.add("Force TCP instead of UDP to reduce error snapshots.\nToggle ON before joining a server or hosting.")
             .color(Color.lightGray).fontScale(0.9f).wrap().growX().pad(10).row();
 
         dialog.cont.button(enabled ? "ON" : "OFF", () -> {
