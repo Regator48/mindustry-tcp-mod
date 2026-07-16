@@ -2,7 +2,6 @@ package mindustry.tcpmod;
 
 import arc.Core;
 import arc.Events;
-import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import mindustry.Vars;
 import mindustry.game.EventType.ClientLoadEvent;
@@ -20,12 +19,17 @@ public class TCPMod extends Mod {
     @Override
     public void init() {
         Events.on(ClientLoadEvent.class, e -> {
+            // Wait longer for UI to be ready
             Core.app.post(() -> {
-                try {
-                    setup();
-                } catch (Exception err) {
-                    Log.err("TCP Mod: Failed to initialize", err);
-                }
+                Core.app.post(() -> {
+                    Core.app.post(() -> {
+                        try {
+                            setup();
+                        } catch (Exception err) {
+                            Log.err("TCP Mod: Failed to initialize", err);
+                        }
+                    });
+                });
             });
         });
     }
@@ -35,7 +39,12 @@ public class TCPMod extends Mod {
         settingsDialog = new TCPSettingsDialog();
 
         // Add button to main menu
-        Vars.ui.menufrag.addButton("TCP Mode", () -> settingsDialog.show());
+        if (Vars.ui != null && Vars.ui.menufrag != null) {
+            Vars.ui.menufrag.addButton("TCP Mode", () -> settingsDialog.show());
+            Log.info("TCP Mod: Added button to menu");
+        } else {
+            Log.warn("TCP Mod: UI or menufrag is null");
+        }
 
         Log.info("TCP Mod: Initialized");
     }
