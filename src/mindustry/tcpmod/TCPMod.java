@@ -20,7 +20,7 @@ public class TCPMod extends Mod {
     private static final String REPO = "Regator48/mindustry-tcp-mod";
     private static final String API_URL = "https://api.github.com/repos/" + REPO + "/releases/latest";
     private static Table tcpIndicator;
-    private static String currentVersion = "1.2";
+    private static String currentVersion = "1.3";
     private static String latestVersion = null;
     private static String downloadUrl = null;
 
