@@ -8,6 +8,10 @@ import mindustry.mod.Mod;
 
 public class TCPMod extends Mod {
 
+    static {
+        System.out.println("[TCP MOD] Static initializer!");
+    }
+
     public TCPMod() {
         System.out.println("[TCP MOD] Constructor called!");
     }
