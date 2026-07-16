@@ -15,6 +15,8 @@ import mindustry.ui.dialogs.BaseDialog;
 
 public class TCPMod extends Mod {
 
+    public static boolean tcpEnabled = false;
+
     public TCPMod() {
         Log.info("TCP Mod: Loaded");
     }
@@ -22,6 +24,9 @@ public class TCPMod extends Mod {
     @Override
     public void init() {
         Log.info("TCP Mod: init");
+
+        tcpEnabled = Core.settings.getBool("tcp-mod-enabled", false);
+
         Events.on(ClientLoadEvent.class, e -> {
             Core.app.post(() -> {
                 Vars.ui.menufrag.addButton("TCP Mode", this::showDialog);
@@ -34,7 +39,7 @@ public class TCPMod extends Mod {
         BaseDialog dialog = new BaseDialog("TCP Mode");
         dialog.addCloseButton();
 
-        boolean enabled = Core.settings.getBool("tcp-mod-enabled", false);
+        boolean enabled = tcpEnabled;
 
         dialog.cont.table(t -> {
             t.left();
@@ -45,12 +50,16 @@ public class TCPMod extends Mod {
         dialog.cont.add("Force TCP instead of UDP to reduce error snapshots.")
             .color(Color.lightGray).fontScale(0.9f).wrap().growX().pad(10).row();
 
-        // Toggle button
         dialog.cont.button(enabled ? "ON" : "OFF", () -> {
-            boolean newValue = !Core.settings.getBool("tcp-mod-enabled", false);
-            Core.settings.put("tcp-mod-enabled", newValue);
+            tcpEnabled = !tcpEnabled;
+            Core.settings.put("tcp-mod-enabled", tcpEnabled);
+            if (tcpEnabled) {
+                TCPForcer.enable();
+            } else {
+                TCPForcer.disable();
+            }
             dialog.hide();
-            showDialog(); // reopen to refresh
+            showDialog();
         }).height(60).width(200).pad(10)
           .color(enabled ? Color.green : Color.red).row();
 

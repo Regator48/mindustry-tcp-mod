@@ -35,17 +35,14 @@ public class TCPForcer {
                 return;
             }
 
-            // Get the sendTCP method
             Method sendTCP = client.getClass().getMethod("sendTCP", Object.class);
 
-            // Create dynamic proxy
             Class<?> providerInterface = Class.forName("mindustry.net.Net$NetProvider");
             Object proxy = Proxy.newProxyInstance(
                 providerInterface.getClassLoader(),
                 new Class<?>[]{ providerInterface },
                 (proxyObj, method, args) -> {
                     if ("sendClient".equals(method.getName()) && args.length == 2) {
-                        // Force TCP for all client sends
                         sendTCP.invoke(client, args[0]);
                         return null;
                     }
@@ -55,7 +52,7 @@ public class TCPForcer {
 
             providerField.set(Vars.net, proxy);
             active = true;
-            Log.info("TCP Mod: TCP forcing enabled via proxy");
+            Log.info("TCP Mod: TCP forcing enabled");
         } catch (Exception e) {
             Log.err("TCP Mod: Failed to enable TCP forcing", e);
         }
@@ -63,7 +60,6 @@ public class TCPForcer {
 
     public static void disable() {
         if (!active) return;
-        // Restoring original provider is complex; just log for now
         active = false;
         Log.info("TCP Mod: TCP forcing disabled (restart to fully restore)");
     }
