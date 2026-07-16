@@ -78,7 +78,7 @@ public class TCPMod extends Mod {
                     downloadUrl = json.substring(urlStart, urlEnd);
                 }
 
-                Log.info("TCP Mod: Latest version: " + latestVersion);
+                Log.info("TCP Mod: Latest version: " + latestVersion + ", downloadUrl: " + downloadUrl);
 
                 if (latestVersion != null && !latestVersion.equals(currentVersion) && downloadUrl != null) {
                     Core.app.post(() -> showUpdateDialog());
@@ -99,17 +99,26 @@ public class TCPMod extends Mod {
         dialog.cont.add("You have version " + currentVersion)
             .color(Color.lightGray).pad(5).row();
 
-        dialog.cont.button("Update", () -> {
-            dialog.hide();
-            downloadUpdate();
-        }).height(60).width(200).pad(10).color(Color.green).row();
-
         dialog.cont.button("Skip", dialog::hide).height(60).width(200).pad(10).color(Color.gray).row();
+
+        if (downloadUrl != null && !downloadUrl.isEmpty()) {
+            dialog.cont.button("Update", () -> {
+                dialog.hide();
+                downloadUpdate();
+            }).height(60).width(200).pad(10).color(Color.green).row();
+        } else {
+            dialog.cont.add("Download URL not available").color(Color.red).pad(10).row();
+        }
 
         dialog.show();
     }
 
     private void downloadUpdate() {
+        if (downloadUrl == null || downloadUrl.isEmpty()) {
+            Vars.ui.showErrorMessage("No download URL available. Please try again later.");
+            return;
+        }
+
         BaseDialog dialog = new BaseDialog("Downloading");
         dialog.cont.add("Downloading update...").pad(20).row();
         dialog.cont.add("Please wait").color(Color.lightGray).pad(10).row();
