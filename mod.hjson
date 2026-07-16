@@ -6,3 +6,4 @@ version: "1.0"
 main: "mindustry.tcpmod.TCPMod"
 minGameVersion: "159"
 java: true
+hidden: true
