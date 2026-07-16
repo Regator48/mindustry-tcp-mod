@@ -72,8 +72,12 @@ public class TCPMod extends Mod {
                     latestVersion = json.substring(tagStart, tagEnd).replace("v", "");
                 }
 
-                int urlStart = json.indexOf("\"browser_download_url\":\"") + 23;
+                int urlStart = json.indexOf("browser_download_url") + 23;
                 int urlEnd = json.indexOf("\"", urlStart);
+                while (urlStart > 22 && urlEnd > urlStart && json.charAt(urlStart) != '"') {
+                    urlStart++;
+                    urlEnd = json.indexOf("\"", urlStart);
+                }
                 if (urlStart > 22 && urlEnd > urlStart) {
                     downloadUrl = json.substring(urlStart, urlEnd);
                 }
@@ -99,15 +103,18 @@ public class TCPMod extends Mod {
         dialog.cont.add("You have version " + currentVersion)
             .color(Color.lightGray).pad(5).row();
 
-        dialog.cont.button("Skip", dialog::hide).height(60).width(200).pad(10).color(Color.gray).row();
-
         if (downloadUrl != null && !downloadUrl.isEmpty()) {
-            dialog.cont.button("Update", () -> {
-                dialog.hide();
-                downloadUpdate();
-            }).height(60).width(200).pad(10).color(Color.green).row();
+            dialog.cont.table(t -> {
+                t.button("Update", () -> {
+                    dialog.hide();
+                    downloadUpdate();
+                }).height(50).width(150).pad(10).color(Color.green);
+
+                t.button("Skip", dialog::hide).height(50).width(150).pad(10).color(Color.gray);
+            }).pad(10).row();
         } else {
             dialog.cont.add("Download URL not available").color(Color.red).pad(10).row();
+            dialog.cont.button("Close", dialog::hide).height(50).width(150).pad(10).color(Color.gray).row();
         }
 
         dialog.show();
