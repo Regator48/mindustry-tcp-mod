@@ -1,0 +1,7 @@
+name: "tcp-mod"
+displayName: "TCP over UDP"
+author: "regator47"
+description: "Force TCP connections instead of UDP to reduce error snapshots."
+version: "1.0"
+main: "mindustry.tcpmod.TCPMod"
+minGameVersion: 146
