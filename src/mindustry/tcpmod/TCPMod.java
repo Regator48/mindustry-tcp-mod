@@ -72,14 +72,17 @@ public class TCPMod extends Mod {
                     latestVersion = json.substring(tagStart, tagEnd).replace("v", "");
                 }
 
-                int urlStart = json.indexOf("browser_download_url") + 23;
-                int urlEnd = json.indexOf("\"", urlStart);
-                while (urlStart > 22 && urlEnd > urlStart && json.charAt(urlStart) != '"') {
-                    urlStart++;
-                    urlEnd = json.indexOf("\"", urlStart);
-                }
-                if (urlStart > 22 && urlEnd > urlStart) {
-                    downloadUrl = json.substring(urlStart, urlEnd);
+                // Find browser_download_url value
+                String dlKey = "browser_download_url";
+                int dlKeyIdx = json.indexOf(dlKey);
+                if (dlKeyIdx >= 0) {
+                    // Find the opening quote of the value (after the colon)
+                    int colonIdx = json.indexOf(":", dlKeyIdx + dlKey.length());
+                    int valueQuoteStart = json.indexOf("\"", colonIdx + 1);
+                    int valueQuoteEnd = json.indexOf("\"", valueQuoteStart + 1);
+                    if (valueQuoteStart >= 0 && valueQuoteEnd > valueQuoteStart) {
+                        downloadUrl = json.substring(valueQuoteStart + 1, valueQuoteEnd);
+                    }
                 }
 
                 Log.info("TCP Mod: Latest version: " + latestVersion + ", downloadUrl: " + downloadUrl);
