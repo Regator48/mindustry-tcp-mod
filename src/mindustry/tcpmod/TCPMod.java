@@ -6,47 +6,30 @@ import arc.util.Log;
 import mindustry.Vars;
 import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.mod.Mod;
-import mindustry.tcpmod.ui.TCPSettingsDialog;
 
 public class TCPMod extends Mod {
 
-    public static TCPSettingsDialog settingsDialog;
-
     public TCPMod() {
-        Log.info("TCP Mod loaded");
+        Log.info("[TCP Mod] Constructor called");
     }
 
     @Override
     public void init() {
+        Log.info("[TCP Mod] init called");
         Events.on(ClientLoadEvent.class, e -> {
-            // Wait longer for UI to be ready
+            Log.info("[TCP Mod] ClientLoadEvent fired");
             Core.app.post(() -> {
-                Core.app.post(() -> {
-                    Core.app.post(() -> {
-                        try {
-                            setup();
-                        } catch (Exception err) {
-                            Log.err("TCP Mod: Failed to initialize", err);
-                        }
+                Log.info("[TCP Mod] Adding button...");
+                try {
+                    Vars.ui.menufrag.addButton("TCP Mode", () -> {
+                        Log.info("[TCP Mod] Button clicked");
                     });
-                });
+                    Log.info("[TCP Mod] Button added successfully");
+                } catch (Exception ex) {
+                    Log.err("[TCP Mod] Failed to add button", ex);
+                }
             });
         });
-    }
-
-    private void setup() {
-        TCPSettings.load();
-        settingsDialog = new TCPSettingsDialog();
-
-        // Add button to main menu
-        if (Vars.ui != null && Vars.ui.menufrag != null) {
-            Vars.ui.menufrag.addButton("TCP Mode", () -> settingsDialog.show());
-            Log.info("TCP Mod: Added button to menu");
-        } else {
-            Log.warn("TCP Mod: UI or menufrag is null");
-        }
-
-        Log.info("TCP Mod: Initialized");
     }
 
     @Override
