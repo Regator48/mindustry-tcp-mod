@@ -2,35 +2,30 @@ package mindustry.tcpmod;
 
 import arc.Core;
 import arc.Events;
+import arc.util.Log;
 import mindustry.Vars;
 import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.mod.Mod;
 
 public class TCPMod extends Mod {
 
-    static {
-        System.out.println("[TCP MOD] Static initializer!");
-    }
-
     public TCPMod() {
-        System.out.println("[TCP MOD] Constructor called!");
+        Log.info("TCP Mod: Constructor called");
     }
 
     @Override
     public void init() {
-        System.out.println("[TCP MOD] init called!");
+        Log.info("TCP Mod: init called");
         Events.on(ClientLoadEvent.class, e -> {
-            System.out.println("[TCP MOD] ClientLoadEvent fired!");
             Core.app.post(() -> {
-                System.out.println("[TCP MOD] Adding button...");
+                Log.info("TCP Mod: Adding button...");
                 try {
                     Vars.ui.menufrag.addButton("TCP Mode", () -> {
-                        System.out.println("[TCP MOD] Button clicked!");
+                        Log.info("TCP Mod: Button clicked");
                     });
-                    System.out.println("[TCP MOD] Button added!");
+                    Log.info("TCP Mod: Button added!");
                 } catch (Exception ex) {
-                    System.out.println("[TCP MOD] Error: " + ex.getMessage());
-                    ex.printStackTrace();
+                    Log.err("TCP Mod: Failed to add button", ex);
                 }
             });
         });

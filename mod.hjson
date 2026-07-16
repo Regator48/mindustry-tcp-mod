@@ -4,4 +4,5 @@ author: "regator47"
 description: "Force TCP connections instead of UDP to reduce error snapshots."
 version: "1.0"
 main: "mindustry.tcpmod.TCPMod"
-minGameVersion: 159
+minGameVersion: "159"
+java: true
